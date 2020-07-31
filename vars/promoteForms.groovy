@@ -1,13 +1,25 @@
 #!/usr/bin/env groovy
 
-import org.example.Constants
-import org.example.PromoteAForm
+def call() {
+  pipeline {
+    agent any
 
-def call(String filename = Constants.PROMOTION_FILES[0]) {
-  echo "Promoting $WORKSPACE/$filename"
-  def lines = new File("$WORKSPACE", filename).readLines()
-  def fp = new PromoteAForm()
-  lines.each {
-    fp.promote(it)
-  }
+    parameters {      
+      string(name: "DEV_TO_TEST_EXPORT_API_URL", defaultValue: "", description: "Export API URL for dev to test environment promotion")      
+      string(name: "DEV_TO_TEST_IMPORT_API_URL", defaultValue: "", description: "Import API URL for dev to test environment promotion")      
+      string(name: "DEV_TO_TEST_API_CREDENTIAL", defaultValue: "SMARTFORM_PROMOTION_DEV", description: "Export/Import API Credential for dev to test environment promotion")
+      string(name: "DEV_TO_TEST_FORM_FILENAME", defaultValue: "dev-to-test-form-promotion", description: "Dev to test form promotion filename")
+    }
+
+    stages {
+        stage('Promote Forms In A File') {
+            steps {
+              script {
+                def fp = new smartform.PromoteAForm()
+                fp.promoteFormsInFile()
+              }              
+            }
+        }
+    }
+}
 }
